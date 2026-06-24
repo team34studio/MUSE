@@ -36,7 +36,7 @@ MUSE/
 
 | Need | How to get it |
 |------|----------------|
-| **This repository | Clone this repo anywhere on your pc |
+| **This repository** | Clone this repo anywhere on your pc |
 | **HELIX Studio** | Installed via Steam (the modkit you're targeting). |
 | **Visual Studio 2022** | Community edition is fine. Install the **"Game development with C++"** workload. |
 | **Vanilla Unreal Engine 5.7** | Epic Games Launcher → Unreal Engine → install **5.7** (any 5.7.x patch). Needed only to compile. |
