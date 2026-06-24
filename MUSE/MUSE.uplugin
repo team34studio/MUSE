@@ -1,0 +1,156 @@
+{
+  "FileVersion": 3,
+  "Version": 3,
+  "VersionName": "0.1.4",
+  "FriendlyName": "MUSE",
+  "Description": "MUSE — Modular Unreal Studio Engine, by Prysma Studio. Lets AI assistants (Claude, Cursor, etc.) work alongside the Unreal editor via the Model Context Protocol. 200+ automation actions for assets, actors, levels, blueprints, animation, materials and more, served by a native in-editor MCP server. Based on ChiR24/Unreal_mcp (MIT).",
+  "Category": "Prysma Studio",
+  "CreatedBy": "Prysma Studio",
+  "CreatedByURL": "",
+  "DocsURL": "",
+  "MarketplaceURL": "",
+  "SupportURL": "",
+  "CanContainContent": false,
+  "IsBetaVersion": true,
+  "IsExperimentalVersion": true,
+  "EnabledByDefault": true,
+  "SupportsUEBuildSystem": true,
+  "Modules": [
+    {
+      "Name": "McpAutomationBridge",
+      "Type": "Editor",
+      "LoadingPhase": "Default",
+      "PlatformAllowList": ["Win64", "Mac", "Linux"]
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "EditorScriptingUtilities",
+      "Enabled": true
+    },
+    {
+      "Name": "LevelSequenceEditor",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "Niagara",
+      "Enabled": true
+    },
+    {
+      "Name": "NiagaraEditor",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "BehaviorTreeEditor",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "EnvironmentQueryEditor",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "ControlRig",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "IKRig",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "ChaosVehiclesPlugin",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "AnimationData",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "ProceduralMeshComponent",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "Interchange",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "InterchangeOpenUSD",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "DataValidation",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "EnhancedInput",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "GeometryScripting",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "ChaosCloth",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "GameplayAbilities",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "StructUtils",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "Metasound",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "StateTree",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "SmartObjects",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "MassGameplay",
+      "Enabled": true,
+      "Optional": true
+    },
+    {
+      "Name": "OnlineSubsystem",
+      "Enabled": true,
+      "Optional": true
+    },
+	{
+		"Name": "OnlineSubsystemUtils",
+		"Enabled": true,
+		"Optional": true
+	},
+	{
+		"Name": "Synthesis",
+		"Enabled": true,
+		"Optional": true
+	}
+  ]
+}
