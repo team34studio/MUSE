@@ -17,6 +17,12 @@
 #include "Textures/SlateIcon.h"
 #include "Styling/AppStyle.h"
 #include "McpAutomationBridgeSettings.h"
+#include "Framework/Docking/TabManager.h"
+#include "Widgets/Docking/SDockTab.h"
+#include "Widgets/Input/SButton.h"
+#include "Widgets/Text/STextBlock.h"
+#include "Widgets/SBoxPanel.h"
+#include "SWebBrowser.h"
 #endif
 
 namespace HelixPanelInternal
@@ -242,7 +248,9 @@ namespace HelixPanelInternal
 	}
 
 #if WITH_EDITOR
-	void OpenHelixPanel()
+	const FName MusePanelTabId(TEXT("MUSEConnectPanel"));
+
+	TSharedRef<SDockTab> SpawnMusePanelTab(const FSpawnTabArgs&)
 	{
 		int32 Port = 3000;
 		if (const UMcpAutomationBridgeSettings* S = GetDefault<UMcpAutomationBridgeSettings>())
@@ -250,7 +258,35 @@ namespace HelixPanelInternal
 			Port = S->NativeMCPPort;
 		}
 		const FString PanelUrl = FString::Printf(TEXT("http://127.0.0.1:%d/panel"), Port);
-		FPlatformProcess::LaunchURL(*PanelUrl, nullptr, nullptr);
+		return SNew(SDockTab)
+			.TabRole(ETabRole::NomadTab)
+			[
+				SNew(SWebBrowser)
+				.InitialURL(PanelUrl)
+				.ShowControls(false)
+			];
+	}
+
+	void RegisterMusePanelTabSpawner()
+	{
+		static bool bRegistered = false;
+		if (bRegistered)
+		{
+			return;
+		}
+		bRegistered = true;
+		FGlobalTabmanager::Get()->RegisterNomadTabSpawner(
+			MusePanelTabId, FOnSpawnTab::CreateStatic(&SpawnMusePanelTab))
+			.SetDisplayName(FText::FromString(TEXT("MUSE")))
+			.SetTooltipText(FText::FromString(TEXT("MUSE connect panel — by Prysma Studio")))
+			.SetMenuType(ETabSpawnerMenuType::Hidden);
+	}
+
+	void OpenHelixPanel()
+	{
+		// Open the connect panel as a dockable tab inside the editor.
+		RegisterMusePanelTabSpawner();
+		FGlobalTabmanager::Get()->TryInvokeTab(FTabId(MusePanelTabId));
 	}
 #endif
 } // namespace HelixPanelInternal
@@ -295,6 +331,9 @@ void HelixPanel_HandleApi(const FString& Path, const FString& Body, int32 McpPor
 void HelixPanel_RegisterToolbar()
 {
 #if WITH_EDITOR
+	// Register the dockable-tab spawner so the panel can live inside the editor.
+	RegisterMusePanelTabSpawner();
+
 	if (!UToolMenus::IsToolMenuUIEnabled())
 	{
 		return;
@@ -305,12 +344,27 @@ void HelixPanel_RegisterToolbar()
 		return;
 	}
 	FToolMenuSection& Section = Toolbar->FindOrAddSection(TEXT("HelixMCP"));
-	FToolMenuEntry Entry = FToolMenuEntry::InitToolBarButton(
-		TEXT("HelixMCPPanel"),
-		FUIAction(FExecuteAction::CreateStatic(&OpenHelixPanel)),
-		FText::FromString(TEXT("MUSE")),
-		FText::FromString(TEXT("Open the MUSE connect panel (server status + one-click agent connect) — by Prysma Studio.")),
-		FSlateIcon());
+	// Use a labelled widget so "MUSE" is always visible (a plain toolbar button
+	// with no icon renders as empty/hard to find).
+	FToolMenuEntry Entry = FToolMenuEntry::InitWidget(
+		TEXT("MUSEPanelButton"),
+		SNew(SButton)
+		.ButtonStyle(&FAppStyle::Get().GetWidgetStyle<FButtonStyle>("SimpleButton"))
+		.ToolTipText(FText::FromString(TEXT("Open the MUSE connect panel — by Prysma Studio")))
+		.VAlign(VAlign_Center)
+		.OnClicked(FOnClicked::CreateLambda([]() { OpenHelixPanel(); return FReply::Handled(); }))
+		[
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(7.f, 0.f, 7.f, 0.f)
+			[
+				SNew(STextBlock)
+				.Text(FText::FromString(TEXT("MUSE")))
+			]
+		],
+		FText::GetEmpty(),
+		true,   // bNoIndent
+		false   // bSearchable
+	);
 	Section.AddEntry(Entry);
 #endif
 }

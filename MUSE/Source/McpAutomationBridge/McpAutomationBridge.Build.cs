@@ -162,6 +162,7 @@ public class McpAutomationBridge : ModuleRules
                 "Sockets","Networking","EditorSubsystem","EditorScriptingUtilities","BlueprintGraph","SSL",
                 "Kismet","KismetCompiler","AssetRegistry","AssetTools","SourceControl",
                 "AudioEditor", "AudioMixer",
+                "WebBrowser",  // SWebBrowser for the in-editor MUSE connect panel tab
                 // Native MCP uses raw sockets (Sockets/Networking already listed above)
                 // Optional plugins are handled by AddOptionalDynamicModule() below with delay-load
             });
