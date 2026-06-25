@@ -841,6 +841,14 @@ void UMcpAutomationBridgeSubsystem::RegisterHandler(
  * handler.
  */
 void UMcpAutomationBridgeSubsystem::InitializeHandlers() {
+  // Helix-specific tools
+  RegisterHandler(TEXT("helix_docs"),
+                  [this](const FString &R, const FString &A,
+                         const TSharedPtr<FJsonObject> &P,
+                         TSharedPtr<FMcpBridgeWebSocket> S) {
+                    return HandleHelixDocsAction(R, A, P, S);
+                  });
+
   // Core & Properties
   RegisterHandler(TEXT("execute_editor_function"),
                   [this](const FString &R, const FString &A,

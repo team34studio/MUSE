@@ -353,6 +353,10 @@ private:
   bool HandleAssetAction(const FString &RequestId, const FString &Action,
                          const TSharedPtr<FJsonObject> &Payload,
                          TSharedPtr<FMcpBridgeWebSocket> RequestingSocket);
+  // helix_docs tool — consult docs.helixgame.com (async HTTP)
+  bool HandleHelixDocsAction(const FString &RequestId, const FString &Action,
+                             const TSharedPtr<FJsonObject> &Payload,
+                             TSharedPtr<FMcpBridgeWebSocket> RequestingSocket);
   // Asset dependency graph traversal
   bool
   HandleGetAssetReferences(const FString &RequestId, const FString &Action,

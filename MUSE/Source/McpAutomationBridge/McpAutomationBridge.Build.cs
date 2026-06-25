@@ -142,7 +142,8 @@ public class McpAutomationBridge : ModuleRules
             "Core","CoreUObject","Engine","Json","JsonUtilities",
             "LevelSequence", "MovieScene", "MovieSceneTracks", "GameplayTags",
             "AIModule",  // Required for UEnvQueryTest_Distance and other EQS classes
-            "Landscape"  // Required for FGrassVariety and other landscape classes
+            "Landscape", // Required for FGrassVariety and other landscape classes
+            "HTTP"       // helix_docs tool — async fetch of docs.helixgame.com
         });
 
         if (Target.bBuildEditor)
