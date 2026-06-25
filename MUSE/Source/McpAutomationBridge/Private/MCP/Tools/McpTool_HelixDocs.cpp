@@ -39,3 +39,9 @@ public:
 };
 
 MCP_REGISTER_TOOL(FMcpTool_HelixDocs);
+
+// Anti-strip anchor. This file only contains a self-registering static, so under
+// adaptive/standalone compilation the linker can dead-strip the whole object
+// (and the registration never runs). Referencing this from the subsystem forces
+// the linker to keep the translation unit.
+void ForceLinkHelixDocsTool() {}

@@ -841,6 +841,11 @@ void UMcpAutomationBridgeSubsystem::RegisterHandler(
  * handler.
  */
 void UMcpAutomationBridgeSubsystem::InitializeHandlers() {
+  // Keep the helix_docs tool-definition TU from being dead-stripped (it only
+  // contains a self-registering static).
+  extern void ForceLinkHelixDocsTool();
+  ForceLinkHelixDocsTool();
+
   // Helix-specific tools
   RegisterHandler(TEXT("helix_docs"),
                   [this](const FString &R, const FString &A,
