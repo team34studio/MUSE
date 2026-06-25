@@ -1,5 +1,7 @@
 # MUSE — Modular Unreal Studio Engine
 
+![MUSE](https://socialify.git.ci/team34studio/MUSE/image?description=1&font=JetBrains+Mono&language=1&logo=https%3A%2F%2Fcdn.borderlinerp.com%2Ff%2FPrysma-mqt64xp4zz0vm5.svg&name=1&owner=1&pattern=Plus&theme=Dark)
+
 A native in-editor **MCP (Model Context Protocol) server** for the **HELIX Studio**
 modkit. It lets AI assistants — Claude Code,
 Claude Desktop, Cursor, Codex — work alongside the editor: inspect and edit assets,
