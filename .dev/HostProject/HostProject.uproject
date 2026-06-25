@@ -1,0 +1,19 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "",
+	"Category": "",
+	"Description": "Dev-only host project for incremental MUSE builds. Not shipped.",
+	"Modules": [
+		{
+			"Name": "HostProject",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "MUSE",
+			"Enabled": true
+		}
+	]
+}

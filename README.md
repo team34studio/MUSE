@@ -21,20 +21,40 @@ MUSE/
 │   ├── Source/McpAutomationBridge/   (C++ editor module)
 │   └── LICENSE
 ├── tools/
-│   ├── build.bat         compile the plugin against vanilla UE 5.7
-│   └── deploy.py         install into HELIX + swap BuildId
+│   ├── build.bat         clean full build against vanilla UE 5.7
+│   ├── build-fast.bat    incremental build (recompiles only changed files)
+│   ├── deploy.py         install into HELIX + swap BuildId
+│   └── manager/          MUSE Manager — one-click installer GUI (.exe)
+├── .dev/                 dev-only host project for incremental builds (git-ignored output)
 ├── build/                build output (git-ignored)
 └── README.md
 ```
 
 ## Installation
 
+### Easy install — MUSE Manager (recommended)
+
+If you just want to use MUSE, grab **MUSE Manager** (`tools/manager/`, or the packaged
+`MUSE Manager.exe`) and run it:
+
+1. Open it — it auto-detects your HELIX Studio install (or click **Browse**).
+2. Click **Install**.
+3. Restart HELIX.
+
+After a HELIX update turns the plugin off, open MUSE Manager and click **Update** — it
+re-applies the BuildId fix in a second. **Uninstall** removes the plugin and undoes every
+change it made. No engine or build tools required when using a prebuilt copy.
+
+Build it from source with `tools/manager/build_exe.bat` (needs `pip install pyinstaller`).
+
+### Manual / developer install
+
 > HELIX Studio is a custom UE 5.7.4 build with the engine headers stripped, so the
 > plugin **cannot** be compiled against it directly. You compile once against a normal
 > (vanilla) UE 5.7 install, then `deploy.py` copies the result into HELIX and rewrites
 > the binary's `BuildId` so HELIX accepts it. This is a one-time ~15 min setup.
 
-### 1. Prerequisites
+#### 1. Prerequisites
 
 | Need | How to get it |
 |------|----------------|
@@ -44,14 +64,14 @@ MUSE/
 | **Vanilla Unreal Engine 5.7** | Epic Games Launcher → Unreal Engine → install **5.7** (any 5.7.x patch). Needed only to compile. |
 | **Python 3** | For `deploy.py` (`python --version` should work). |
 
-### 2. Point the scripts at your machine
+#### 2. Point the scripts at your machine
 
-The two scripts use absolute paths — edit them if yours differ:
+The scripts use absolute paths — edit them if yours differ:
 
-- **`tools/build.bat`** → `set "ENGINE=E:\UE\UE_5.7"` — set to your **vanilla UE 5.7** folder.
+- **`tools/build.bat`** and **`tools/build-fast.bat`** → `set "ENGINE=E:\UE\UE_5.7"` — set to your **vanilla UE 5.7** folder.
 - **`tools/deploy.py`** → `HELIX_ENGINE = r"...\HELIX Studio\Engine"` — set to your **HELIX Studio** `Engine` folder.
 
-### 3. Build the plugin
+#### 3. Build the plugin
 
 Close HELIX, then from this repo's folder run:
 
@@ -62,7 +82,11 @@ tools\build.bat
 First build takes ~10–20 min. Wait for **`[OK] Build succeeded`**. The compiled plugin
 lands in `build\MUSE\`.
 
-### 4. Deploy into HELIX
+> **Iterating on the code?** Use `tools\build-fast.bat` instead. It builds incrementally
+> (recompiles only the files you changed) via a small dev host project under `.dev/`, so
+> after the first run rebuilds take seconds. `deploy.py` auto-picks whichever build is newest.
+
+#### 4. Deploy into HELIX
 
 ```bat
 python tools\deploy.py
@@ -71,7 +95,7 @@ python tools\deploy.py
 This copies the plugin to `…\HELIX Studio\Engine\Plugins\MUSE\`, removes any old copy,
 and swaps the `BuildId` to match your current HELIX build.
 
-### 5. Enable it in your project
+#### 5. Enable it in your project
 
 Open your project's `.uproject` and add MUSE to the plugins list:
 
@@ -81,7 +105,7 @@ Open your project's `.uproject` and add MUSE to the plugins list:
 ]
 ```
 
-### 6. Launch & turn on the server
+#### 6. Launch & turn on the server
 
 1. Open HELIX with your project.
 2. Go to **Edit → Project Settings → Plugins → MUSE** and tick **Enable Native MCP**.
@@ -90,7 +114,7 @@ Open your project's `.uproject` and add MUSE to the plugins list:
 
 The MCP endpoint is now live at **`http://127.0.0.1:3000/mcp`**.
 
-### 7. Connect an agent
+#### 7. Connect an agent
 
 Click the **MUSE** toolbar button (opens the connect panel) and hit **Connect** next to
 your agent — or configure it manually (see *Connect an agent* below).
@@ -100,7 +124,8 @@ your agent — or configure it manually (see *Connect an agent* below).
 ### ⚠️ After every HELIX update
 
 Steam updates change HELIX's `BuildId`, which makes the plugin show up disabled
-("modules built with a different engine version"). Fix = re-run the deploy:
+("modules built with a different engine version"). Easiest fix: open **MUSE Manager** and
+click **Update**. From the command line, re-run the deploy instead:
 
 ```bat
 python tools\deploy.py

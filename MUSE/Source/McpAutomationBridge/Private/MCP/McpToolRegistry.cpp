@@ -30,7 +30,9 @@ bool IsCanonicalMcpToolName(const FString& Name)
 		TEXT("manage_inventory"),
 		TEXT("manage_interaction"),
 		TEXT("manage_networking"),
-		TEXT("manage_level_structure")
+		TEXT("manage_level_structure"),
+		// Helix-specific tools
+		TEXT("helix_docs")
 	};
 
 	return CanonicalToolNames.Contains(Name);

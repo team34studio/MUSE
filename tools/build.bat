@@ -1,7 +1,7 @@
 @echo off
 setlocal
 rem === Compile the MUSE plugin against vanilla UE 5.7 (produces Binaries) ===
-set "ENGINE=E:\UE\UE_5.7"
+if not defined ENGINE set "ENGINE=E:\UE\UE_5.7"
 set "ROOT=%~dp0.."
 set "PLUGIN=%ROOT%\MUSE\MUSE.uplugin"
 set "OUT=%ROOT%\build\MUSE"
@@ -30,5 +30,4 @@ if "%RC%"=="0" (
 ) else (
   echo [FAIL] Build failed with code %RC% — see the log above.
 )
-endlocal
-exit /b %RC%
+endlocal & exit /b %RC%

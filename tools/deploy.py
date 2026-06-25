@@ -25,11 +25,26 @@ helix_modules = os.path.join(HELIX_ENGINE, "Binaries", "Win64", "UnrealEditor.mo
 
 
 def find_plugin_dir():
-    """The built plugin dir (containing Binaries/Win64/UnrealEditor.modules)."""
-    for c in (BUILD_OUT, os.path.join(BUILD_OUT, "HostProject", "Plugins", PLUGIN_NAME)):
-        if os.path.isfile(os.path.join(c, "Binaries", "Win64", "UnrealEditor.modules")):
-            return c
-    return None
+    """The built plugin dir (containing Binaries/Win64/UnrealEditor.modules).
+
+    Checks both the incremental build output (build-fast.bat writes into the
+    plugin source dir) and the clean packaged output (build.bat -> build/MUSE),
+    and picks whichever was built most recently.
+    """
+    candidates = (
+        os.path.join(ROOT, PLUGIN_NAME),                                  # build-fast.bat (incremental)
+        BUILD_OUT,                                                        # build.bat (clean package)
+        os.path.join(BUILD_OUT, "HostProject", "Plugins", PLUGIN_NAME),   # older RunUAT layout
+    )
+    found = []
+    for c in candidates:
+        modules = os.path.join(c, "Binaries", "Win64", "UnrealEditor.modules")
+        if os.path.isfile(modules):
+            found.append((os.path.getmtime(modules), c))
+    if not found:
+        return None
+    found.sort(reverse=True)  # newest .modules first
+    return found[0][1]
 
 
 def main():
