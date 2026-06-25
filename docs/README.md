@@ -23,9 +23,10 @@ You stay in control the whole time. The editor is open in front of you, so you c
 - "Move the car 200 units to the right."
 - "How do I create a custom vehicle in Helix?" — it reads the docs for you.
 
-…and a lot more. See [Tools](tools.md) for the full picture.
+…and a lot more. See [Example Prompts](example-prompts.md) for the full picture.
 
 ## Get started
 
 - [Installation](installation.md) — set MUSE up in a few minutes.
 - [Tools](tools.md) — everything your assistant can do.
+- [Example Prompts](example-prompts.md) — see what you can ask for.
