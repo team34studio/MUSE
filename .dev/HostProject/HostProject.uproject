@@ -15,5 +15,8 @@
 			"Name": "MUSE",
 			"Enabled": true
 		}
+	],
+	"AdditionalPluginDirectories": [
+		"../.."
 	]
 }

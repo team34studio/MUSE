@@ -28,6 +28,7 @@ from tkinter import filedialog, messagebox, ttk
 
 APP_NAME = "MUSE Manager"
 PLUGIN_NAME = "MUSE"
+PLUGIN_MODULE = "McpAutomationBridge"
 MODULE_DLL = "UnrealEditor-McpAutomationBridge.dll"
 MODULES_REL = os.path.join("Binaries", "Win64", "UnrealEditor.modules")
 
@@ -224,24 +225,38 @@ def set_project_enabled(uproject, enabled):
 
 
 # ----------------------------------------------------------------------------
-# Plugin payload: the folder we deploy from
+# Plugin payload: assembled from a source skeleton + a freshly built binary
 # ----------------------------------------------------------------------------
 
-def plugin_payload():
-    """Return the plugin folder to deploy (must contain Binaries + Source)."""
+def plugin_skeleton():
+    """The plugin source folder (Source/Config/.uplugin) — source tree or bundle."""
     cands = []
     root = source_root()
     if root:
-        cands.append(os.path.join(root, PLUGIN_NAME))            # incremental build
-        cands.append(os.path.join(root, "build", PLUGIN_NAME))   # clean package
-        cands.append(os.path.join(root, "build", PLUGIN_NAME,    # RunUAT host layout
-                                  "HostProject", "Plugins", PLUGIN_NAME))
-    cands.append(os.path.join(bundle_dir(), PLUGIN_NAME))        # prebuilt next to exe
+        cands.append(os.path.join(root, PLUGIN_NAME))
+    cands.append(os.path.join(bundle_dir(), PLUGIN_NAME))   # prebuilt next to exe
+    for c in cands:
+        if os.path.isfile(os.path.join(c, f"{PLUGIN_NAME}.uplugin")):
+            return c
+    return None
+
+
+def find_binaries_dir():
+    """The Binaries/Win64 folder holding the freshly built module DLL (newest wins)."""
+    cands = []
+    root = source_root()
+    if root:
+        cands.append(os.path.join(root, ".dev", "HostProject", "Binaries", "Win64"))  # build-fast.bat
+        cands.append(os.path.join(root, PLUGIN_NAME, "Binaries", "Win64"))             # standalone
+        cands.append(os.path.join(root, "build", PLUGIN_NAME, "Binaries", "Win64"))    # RunUAT
+        cands.append(os.path.join(root, "build", PLUGIN_NAME, "HostProject", "Plugins",
+                                  PLUGIN_NAME, "Binaries", "Win64"))
+    cands.append(os.path.join(bundle_dir(), PLUGIN_NAME, "Binaries", "Win64"))          # prebuilt
     found = []
     for c in cands:
-        modules = os.path.join(c, MODULES_REL)
-        if os.path.isfile(modules):
-            found.append((os.path.getmtime(modules), c))
+        dll = os.path.join(c, MODULE_DLL)
+        if os.path.isfile(dll):
+            found.append((os.path.getmtime(dll), c))
     if not found:
         return None
     found.sort(reverse=True)
@@ -292,13 +307,17 @@ def op_build(ctx, log):
 
 
 def op_deploy(ctx, log):
-    """Copy the plugin into HELIX and swap its BuildId."""
+    """Assemble the plugin into HELIX (source skeleton + built binary) + BuildId workaround."""
     helix = ctx["helix"]
-    src = plugin_payload()
-    if not src:
-        raise OpError("No built plugin found to deploy (no Binaries). Build first, "
+    skeleton = plugin_skeleton()
+    bindir = find_binaries_dir()
+    if not skeleton:
+        raise OpError("Plugin source folder not found.")
+    if not bindir:
+        raise OpError("No built module binary found. Build first, "
                       "or use a copy that ships prebuilt binaries.")
-    log(f"Plugin source: {src}")
+    log(f"Skeleton: {skeleton}")
+    log(f"Binaries: {bindir}")
     target = installed_dir(helix)
 
     for old in (target, legacy_dir(helix)):
@@ -306,21 +325,24 @@ def op_deploy(ctx, log):
             shutil.rmtree(old, ignore_errors=True)
             log(f"Removed old: {old}")
 
-    log(f"Copying -> {target}")
-    shutil.copytree(src, target, ignore=shutil.ignore_patterns("HostProject", "Intermediate"))
+    # 1. Source skeleton (no build artifacts).
+    shutil.copytree(skeleton, target,
+                    ignore=shutil.ignore_patterns("Binaries", "Intermediate", "HostProject"))
 
-    # BuildId workaround
-    modules = os.path.join(target, MODULES_REL)
-    if not os.path.isfile(modules):
-        raise OpError(f"Module manifest missing after copy: {modules}")
+    # 2. Built module binary (and its .pdb if present).
+    out_bin = os.path.join(target, "Binaries", "Win64")
+    os.makedirs(out_bin, exist_ok=True)
+    shutil.copy2(os.path.join(bindir, MODULE_DLL), os.path.join(out_bin, MODULE_DLL))
+    pdb = MODULE_DLL.replace(".dll", ".pdb")
+    if os.path.isfile(os.path.join(bindir, pdb)):
+        shutil.copy2(os.path.join(bindir, pdb), os.path.join(out_bin, pdb))
+
+    # 3. Clean module manifest for just this plugin, with HELIX's BuildId.
     want = engine_buildid(helix)
-    with open(modules, "r", encoding="utf-8") as fh:
-        data = json.load(fh)
-    old = data.get("BuildId")
-    data["BuildId"] = want
-    with open(modules, "w", encoding="utf-8") as fh:
-        json.dump(data, fh, indent=1)
-    log(f"BuildId {old} -> {want}")
+    manifest = {"BuildId": want, "Modules": {PLUGIN_MODULE: MODULE_DLL}}
+    with open(os.path.join(out_bin, "UnrealEditor.modules"), "w", encoding="utf-8") as fh:
+        json.dump(manifest, fh, indent="\t")
+    log(f"BuildId -> {want}")
     log("[OK] Deployed.")
 
 
@@ -383,10 +405,10 @@ def op_update(ctx, log):
         return
 
     # Is there a newer build available than what's deployed?
-    src = plugin_payload()
+    bindir = find_binaries_dir()
     newer = False
-    if src:
-        src_dll = os.path.join(src, "Binaries", "Win64", MODULE_DLL)
+    if bindir:
+        src_dll = os.path.join(bindir, MODULE_DLL)
         dst_dll = os.path.join(installed_dir(helix), "Binaries", "Win64", MODULE_DLL)
         if os.path.isfile(src_dll) and os.path.isfile(dst_dll):
             newer = os.path.getmtime(src_dll) > os.path.getmtime(dst_dll) + 1

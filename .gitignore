@@ -7,9 +7,6 @@
 **/Saved/
 **/DerivedDataCache/
 
-# Dev host-project plugin junction (recreated by tools/build-fast.bat)
-/.dev/HostProject/Plugins/
-
 # Logs / OS
 *.log
 .DS_Store

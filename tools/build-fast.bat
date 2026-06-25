@@ -18,23 +18,22 @@ if not exist "%UPROJECT%" (
   exit /b 1
 )
 
-rem Link the plugin into the host project (directory junction; no copy). UE finds
-rem it as a normal project plugin, and Binaries/Intermediate land in the real
-rem MUSE folder. Recreated automatically if missing (e.g. after a fresh clone).
-set "LINK=%ROOT%\.dev\HostProject\Plugins\MUSE"
-if not exist "%LINK%\MUSE.uplugin" (
-  if not exist "%ROOT%\.dev\HostProject\Plugins" mkdir "%ROOT%\.dev\HostProject\Plugins"
-  echo Linking plugin into host project ...
-  mklink /J "%LINK%" "%ROOT%\MUSE" >nul
+rem The host project finds the plugin via AdditionalPluginDirectories ("../..",
+rem the repo root). A .ubtignore in build/ and .dev/ keeps plugin discovery from
+rem also picking up stray copies there. Recreate them if missing (fresh clone).
+if not exist "%ROOT%\build\.ubtignore" (
+  if not exist "%ROOT%\build" mkdir "%ROOT%\build"
+  type nul > "%ROOT%\build\.ubtignore"
 )
+if not exist "%ROOT%\.dev\.ubtignore" type nul > "%ROOT%\.dev\.ubtignore"
 
 echo Incremental build of MUSE (HostProjectEditor) ...
 call "%BUILD%" HostProjectEditor Win64 Development -Project="%UPROJECT%" -WaitMutex
 set "RC=%ERRORLEVEL%"
 echo.
 if "%RC%"=="0" (
-  echo [OK] Build succeeded. Binaries -^> "%ROOT%\MUSE\Binaries\Win64"
-  echo Next: python "%~dp0deploy.py"
+  echo [OK] Build succeeded. Module binary -^> "%ROOT%\.dev\HostProject\Binaries\Win64"
+  echo Next: python "%~dp0deploy.py"  ^(assembles + deploys the plugin^)
 ) else (
   echo [FAIL] Build failed with code %RC% — see the log above.
 )
